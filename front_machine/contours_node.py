@@ -5,7 +5,7 @@ import zmq
 import cv2
 import math
 
-def consumer(addressReceive, addressSend, numTerminate):
+def consumer(addressReceive, addressSend, numTerminate, is_test=False):
     """
     takes  binary image and pushes its contours to the output_node.
     Args:
@@ -45,6 +45,10 @@ def consumer(addressReceive, addressSend, numTerminate):
 
         #send the contours
         consumer_sender.send_pyobj(result)
+
+        # return if the caller is a test
+        if is_test:
+            return
 
     # wait for the other processes to finish    
     time.sleep(10)    

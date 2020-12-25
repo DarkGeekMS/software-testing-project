@@ -4,7 +4,7 @@ import time
 from math import ceil
 import zmq
 
-def collector(addressReceive, addressSend, numTerminate):
+def collector(addressReceive, addressSend, numTerminate, is_test=False):
     """
     takes  binary image and pushes it to the contours_node.
     Args:
@@ -36,6 +36,10 @@ def collector(addressReceive, addressSend, numTerminate):
             TerminationCount +=1
             continue
         collector_sender.send_pyobj(work)
+
+        # return if the caller is a test
+        if is_test:
+            return
 
     # wait for the other processes to finish    
     time.sleep(10)    

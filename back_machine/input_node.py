@@ -4,7 +4,7 @@ import time
 import zmq
 import cv2
 
-def producer(address, videoPath, numTerminate):
+def producer(address, videoPath, numTerminate, is_test=False):
     """
     takes video and pushes its frame.
     Args:
@@ -40,6 +40,10 @@ def producer(address, videoPath, numTerminate):
         # if error occurs break the loop
         else:
             break
+
+        # return if the caller is a test
+        if is_test:
+            return
 
     for i in range (numTerminate):
         work_message = { 'frame': [] }

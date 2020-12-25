@@ -5,7 +5,7 @@ import zmq
 import cv2
 import math
 
-def consumer(addressReceive, addressSend, numTerminate):
+def consumer(addressReceive, addressSend, numTerminate, is_test=False):
     """
     takes video frame and pushes its binary image.
     Args:
@@ -43,6 +43,10 @@ def consumer(addressReceive, addressSend, numTerminate):
         #push the binary result to the collector
         consumer_sender.send_pyobj(msg)
 
+        # return if the caller is a test
+        if is_test:
+            return
+
     # wait for the other processes to finish    
     time.sleep(10)    
 
@@ -60,4 +64,4 @@ def main():
     consumer(config.input_socket, send_address, 1) # call the OTSU consumer process
 
 if __name__=='__main__':
-    main()            
+    main()

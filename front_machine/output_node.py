@@ -4,7 +4,7 @@ import argparse
 import time
 import zmq
 
-def result_collector(address, outputPath, numTerminate):
+def result_collector(address, outputPath, numTerminate, is_test=False):
     """
     takes  controur values of an image and save them in a text file.
     Args:
@@ -43,6 +43,10 @@ def result_collector(address, outputPath, numTerminate):
         #create a dataframe and write outputs
         out_df = pd.DataFrame(out_dict, columns=["Frame Number", "Contours"])
         out_df.to_csv(outputPath)
+
+        # return if the caller is a test
+        if is_test:
+            return
 
     # wait for the other processes to finish    
     time.sleep(10)    
