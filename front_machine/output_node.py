@@ -1,4 +1,4 @@
-from config.parser import get_config_from_json
+from front_machine.config.parser import get_config_from_json
 import pandas as pd
 import argparse
 import time

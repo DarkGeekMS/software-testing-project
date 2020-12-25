@@ -1,4 +1,4 @@
-from config.parser import get_config_from_json
+from back_machine.config.parser import get_config_from_json
 import argparse
 import time
 import zmq
