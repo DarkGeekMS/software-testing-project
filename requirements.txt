@@ -1,2 +1,4 @@
 zmq
+bunch
 opencv-python
+pytest

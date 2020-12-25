@@ -47,7 +47,7 @@ class TestSkipOTSU:
     def test_connection(self):
         global port_counter
         img = cv2.imread('back_machine/inputs/test_image.png', cv2.IMREAD_GRAYSCALE)
-        thread = Thread(target = consumer, args = (in_ports[port_counter], out_ports[port_counter], 1))
+        thread = Thread(target = consumer, args = (in_ports[port_counter], out_ports[port_counter], 1, True))
         thread.start()
         in_message = { 'frame' : img }
         self.in_socket.send_pyobj(in_message)

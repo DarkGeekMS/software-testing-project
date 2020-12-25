@@ -24,3 +24,9 @@ To reset used ports:
 chmod +x reset_ports.sh
 ./reset_ports.sh
 ```
+
+To run tests:
+```
+python -m pytest test_scripts/
+```
+-   Use `--full-trace` to print the stack trace of the failures.
