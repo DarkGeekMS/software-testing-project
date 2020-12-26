@@ -2,12 +2,15 @@
 This script is used to test the skip marker feature on OTSU node module
 """
 import pytest
-import cv2
-import zmq
+import sys
 import time
 import numpy as np
 from threading import Thread
 from back_machine.ostu_node import consumer
+
+# check missing import dependency for opencv and pyzmq
+cv2 = pytest.importorskip("cv2")
+zmq = pytest.importorskip("zmq")
 
 # define in and out ports
 port_counter = 0
@@ -41,6 +44,7 @@ def init_out_socket():
     return zmq_socket
 
 # OTSU node skip test class
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="The test requires python version 3.7 or higher")
 class TestSkipOTSU:
 
     @pytest.fixture(autouse=True)
@@ -49,6 +53,7 @@ class TestSkipOTSU:
         self.in_socket = init_in_socket
         self.out_socket = init_out_socket
 
+    @pytest.mark.skip(reason="The connection test is skipped as it's already included in output test")
     def test_connection(self):
         # test OSTU node connection
         global port_counter
@@ -72,6 +77,7 @@ class TestSkipOTSU:
         # assert type of message
         assert type(frame).__module__ == np.__name__, "OTSU node return is invalid!"
 
+    @pytest.mark.skipif(cv2.__version__ != '4.4.0', reason="Requires OpenCV version '4.4.0'")
     def test_output(self):
         # test OSTU node output validity
         global port_counter
@@ -97,6 +103,7 @@ class TestSkipOTSU:
         # assert value of message
         assert (binary == frame).all(), "The output image of OTSU node is incorrect!"
 
+    @pytest.mark.xfail(strict=False, reason="This test can pass or fail based on termination implementation")
     def test_terminate(self):
         # test OSTU node output validity
         global port_counter
@@ -118,6 +125,7 @@ class TestSkipOTSU:
         # assert value of message
         assert len(frame) == 0, "The output is not empty upon termination!"
     
+    @pytest.mark.xfail(port_counter != 3, reason="This test cannot pass as port counter is wrong" ,raises=RuntimeError)
     def test_wrong_input(self):
         # test OTSU node with invalid input type
         global port_counter
@@ -138,6 +146,7 @@ class TestSkipOTSU:
         ret_message = self.out_socket.recv_pyobj()
         frame = ret_message['binary']
 
+    @pytest.mark.xfail(run=False, reason="This test cannot succeed as no output socket is given")
     def test_wrong_port(self):
         # test OTSU node with invalid port
         global port_counter
@@ -151,7 +160,7 @@ class TestSkipOTSU:
         self.in_socket.send_pyobj(in_message)
         # assert whether the thread is dead
         time.sleep(5)
-        assert thread.is_alive(), "OTSU node thread died, incorrect input!"
+        assert thread.is_alive(), "OTSU node thread died, incorrect port!"
         # join OTSU node thread
         thread.join()
         # read return message from output socket
