@@ -52,7 +52,7 @@ def producer(address, videoPath, numTerminate, is_test=False):
     cap.release()
 
     # wait for the other processes to finish
-    time.sleep(10)
+    # time.sleep(10)
 
 def main():
     """Main driver of input node"""

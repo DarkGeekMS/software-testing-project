@@ -42,7 +42,7 @@ def collector(addressReceive, addressSend, numTerminate, is_test=False):
             return
 
     # wait for the other processes to finish    
-    time.sleep(10)    
+    # time.sleep(10)    
 
 def main():
     """Main driver of collector node"""

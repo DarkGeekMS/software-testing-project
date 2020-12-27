@@ -24,7 +24,6 @@ def result_collector(address, outputPath, numTerminate, is_test=False):
 
     #receive the contours and save them in a txt file
     while True:
-
         if TerminationCount == numTerminate:
             break
 
@@ -35,6 +34,7 @@ def result_collector(address, outputPath, numTerminate, is_test=False):
             TerminationCount += 1
             continue
 
+        print('yalhwaaaaaaaaaaaaaaaaaaaaaaaaay')
         #add the results to output dictionary
         out_dict["Frame Number"].append("Frame #{}".format(counter))
         out_dict["Contours"].append(data)
@@ -49,7 +49,7 @@ def result_collector(address, outputPath, numTerminate, is_test=False):
             return
 
     # wait for the other processes to finish    
-    time.sleep(10)    
+    # time.sleep(10)    
 
 def main():
     """Main driver of output node"""
