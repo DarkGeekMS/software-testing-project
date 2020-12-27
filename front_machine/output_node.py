@@ -34,7 +34,6 @@ def result_collector(address, outputPath, numTerminate, is_test=False):
             TerminationCount += 1
             continue
 
-        print('yalhwaaaaaaaaaaaaaaaaaaaaaaaaay')
         #add the results to output dictionary
         out_dict["Frame Number"].append("Frame #{}".format(counter))
         out_dict["Contours"].append(data)

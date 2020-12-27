@@ -94,7 +94,7 @@ class TestReqMultiFixtures:
 
     @pytest.mark.type('connect')
     # test that requests multi-fixtures
-    def test_input_send_terminate(self, out_port, num_nodes):
+    def test_input_terminate(self, out_port, num_nodes):
         # input node that should send termination after finishing sending the video frames to otsu nodes
         input_thread = Thread(target = producer, args = (out_port, './1.mp4', num_nodes))
         input_thread.start()
