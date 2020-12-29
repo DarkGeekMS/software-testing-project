@@ -55,6 +55,10 @@ class TestSkipOTSU:
 
     @pytest.mark.skip(reason="The connection test is skipped as it's already included in output test")
     def test_connection(self):
+        """
+        Test the connection of OTSU node with in/out sockets
+        TEST TYPE : skip marker
+        """
         # test OSTU node connection
         global port_counter
         # read RGB image as greyscale
@@ -79,6 +83,10 @@ class TestSkipOTSU:
 
     @pytest.mark.skipif(cv2.__version__ != '4.4.0', reason="Requires OpenCV version '4.4.0'")
     def test_output(self):
+        """
+        Test the output validity of OTSU node with in/out sockets
+        TEST TYPE : skipif marker
+        """
         # test OSTU node output validity
         global port_counter
         # read RGB image as greyscale
@@ -105,6 +113,10 @@ class TestSkipOTSU:
 
     @pytest.mark.xfail(strict=False, reason="This test can pass or fail based on termination implementation")
     def test_terminate(self):
+        """
+        Test the termination of OTSU node upon empty messages
+        TEST TYPE : xfail non-strict marker
+        """
         # test OSTU node output validity
         global port_counter
         # create a thread for OTSU node
@@ -127,6 +139,10 @@ class TestSkipOTSU:
     
     @pytest.mark.xfail(port_counter != 3, reason="This test cannot pass as port counter is wrong" ,raises=RuntimeError)
     def test_wrong_input(self):
+        """
+        Test the failure behaviour of OTSU node with invalid inputs
+        TEST TYPE : conditional xfail marker / warnings
+        """
         # test OTSU node with invalid input type
         global port_counter
         # create a thread for OTSU node
@@ -148,6 +164,10 @@ class TestSkipOTSU:
 
     @pytest.mark.xfail(run=False, reason="This test cannot succeed as no output socket is given")
     def test_wrong_port(self):
+        """
+        Test the failure behaviour of OTSU node upon connection with wrong ports
+        TEST TYPE : skippable xfail marker
+        """
         # test OTSU node with invalid port
         global port_counter
         # create a thread for OTSU node (don't pass output port)
