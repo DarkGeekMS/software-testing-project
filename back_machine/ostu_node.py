@@ -4,6 +4,11 @@ import time
 import zmq
 import cv2
 import math
+import random
+
+def get_binary(frame):
+        threshold, binary = cv2.threshold(frame , 0 , 255 , cv2.THRESH_OTSU)
+        return binary
 
 def consumer(addressReceive, addressSend, numTerminate, is_test=False):
     """
@@ -38,8 +43,7 @@ def consumer(addressReceive, addressSend, numTerminate, is_test=False):
             continue
 
         #apply ostu thresholding technique on it
-        threshold, binary = cv2.threshold(frame , 0 , 255 , cv2.THRESH_OTSU)
-        msg = {'binary' : binary}
+        msg = {'binary' : get_binary(frame)}
         #push the binary result to the collector
         consumer_sender.send_pyobj(msg)
 
@@ -49,6 +53,10 @@ def consumer(addressReceive, addressSend, numTerminate, is_test=False):
 
     # wait for the other processes to finish    
     # time.sleep(10)    
+
+def random_sum(intval):
+    return random.randint(1,8) + intval
+
 
 def main():
     """Main driver of ostu consumer node"""
