@@ -77,9 +77,15 @@ class ConnectSockets:
 def init_sockets(request, context, in_port, out_port):
     socket_type = request.node.get_closest_marker("type").args[0]
     if socket_type == 'connect':
-        return ConnectSockets(context, in_port, out_port)
+        sockets = ConnectSockets(context, in_port, out_port)
     elif socket_type == 'bind':
-        return BindSockets(context, in_port, out_port)
+        sockets = BindSockets(context, in_port, out_port)
+    
+    yield sockets
+
+    # release the sockets before running other tests
+    sockets.init_in_socket.close()
+    sockets.init_out_socket.close()
     
 
 class TestReqMultiFixtures:
@@ -123,9 +129,7 @@ class TestReqMultiFixtures:
         assert not input_thread.is_alive(), "input node thread is still alive after s terminations, test failed!"
         input_thread.join()
 
-        # release the sockets before running other tests
-        self.in_socket.close()
-        self.out_socket.close()
+
 
 
 
@@ -152,16 +156,12 @@ class TestReqMultiFixtures:
             assert len(termination_msg['binary']) == 0, "termination msg is not empty!"
 
         # wait till the collector dies
-        time.sleep(0.001)
+        time.sleep(1)
         # make sure that collector dies after sending termination msgs
         assert not collector_thread.is_alive(), "collector node thread is still alive after num_nodes terminations, test failed!"
         collector_thread.join()
 
-        # release the sockets before running other tests
-        self.in_socket.close()
-        self.out_socket.close()
 
-    
 
 
     @pytest.mark.type('bind')
@@ -192,10 +192,7 @@ class TestReqMultiFixtures:
         assert not consumer_thread.is_alive(), "otsu_consumer node thread is still alive after the termination msg, test failed!"
         consumer_thread.join()
 
-        # release the sockets before running other tests
-        self.in_socket.close()
-        self.out_socket.close()
-
+        
 
 
 
@@ -227,11 +224,7 @@ class TestReqMultiFixtures:
         assert not consumer_thread.is_alive(), "contours_consumer node thread is still alive after the termination msg, test failed!"
         consumer_thread.join()
 
-        # release the sockets before running other tests
-        self.in_socket.close()
-        self.out_socket.close()
-
-
+        
 
     @pytest.mark.type('connect')
     # test that requests multi-fixtures
@@ -253,8 +246,4 @@ class TestReqMultiFixtures:
         assert not output_thread.is_alive(), "output node thread is still alive after receiving all terminations, test failed!"
         output_thread.join()
 
-        # release the sockets before running other tests
-        self.in_socket.close()
-        self.out_socket.close()
-
-
+        
