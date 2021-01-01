@@ -6,6 +6,7 @@ import cv2
 import math
 import random
 
+
 def get_binary(frame):
         threshold, binary = cv2.threshold(frame , 0 , 255 , cv2.THRESH_OTSU)
         return binary

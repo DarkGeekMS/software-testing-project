@@ -29,4 +29,6 @@ To run tests:
 ```
 python -m pytest test_scripts/
 ```
+-   Use `-q` to run in quiet mode.
 -   Use `--full-trace` to print the stack trace of the failures.
+-   Use `--testplan <filename>` to enumerate tests with their types without running them.
