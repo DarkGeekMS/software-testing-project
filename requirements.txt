@@ -2,3 +2,5 @@ zmq
 bunch
 opencv-python
 pytest
+pytest-sugar
+pytest-html

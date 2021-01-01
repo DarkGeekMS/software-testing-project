@@ -96,11 +96,11 @@ class TestReqMultiFixtures:
     # test that requests multi-fixtures
     def test_input_terminate(self, out_port, num_nodes):
         # input node that should send termination after finishing sending the video frames to otsu nodes
-        input_thread = Thread(target = producer, args = (out_port, './1.mp4', num_nodes))
+        input_thread = Thread(target = producer, args = (out_port, './back_machine/inputs/1.mp4', num_nodes))
         input_thread.start()
 
         # count number of frames in the video
-        cap = cv2.VideoCapture('./1.mp4')
+        cap = cv2.VideoCapture('./back_machine/inputs/1.mp4')
         frames_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
         # receiving frames from input node
