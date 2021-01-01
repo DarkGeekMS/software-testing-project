@@ -162,7 +162,7 @@ class TestSkipOTSU:
         ret_message = self.out_socket.recv_pyobj()
         frame = ret_message['binary']
 
-    @pytest.mark.xfail(run=False, reason="This test cannot succeed as no output socket is given")
+    @pytest.mark.xfail(run=True, reason="This test cannot succeed as no output socket is given")
     def test_wrong_port(self):
         """
         Test the failure behaviour of OTSU node upon connection with wrong ports
