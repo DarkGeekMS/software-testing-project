@@ -27,7 +27,7 @@ def collector(addressReceive, addressSend, numTerminate, is_test=False):
         if TerminationCount == numTerminate:
             for i in range(numTerminate):
                 msg = { 'binary' : [] }
-                collector_sender.send_pyobj(msg)  
+                collector_sender.send_pyobj(msg) 
             break
 
         #get the frames from ostu node and send them to contours node

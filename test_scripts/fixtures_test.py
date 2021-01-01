@@ -121,8 +121,6 @@ class TestReqMultiFixtures:
 
         # receiving num_nodes empty termination msgs from input node
         for i in range(num_nodes):
-            # make sure that input node is alive
-            assert input_thread.is_alive(), "input node thread died after sending frames and before sending terminations, test failed!"
             termination_msg = self.out_socket.recv_pyobj()
             # make sure that termination msgs are all empty
             assert len(termination_msg['frame']) == 0, "termination msg is not empty!"
@@ -157,14 +155,12 @@ class TestReqMultiFixtures:
 
         # receiving num_nodes empty termination msgs from the collector
         for i in range(num_nodes):
-            # make sure that collector is alive
-            assert collector_thread.is_alive(), "collector node thread died after num_nodes receives and before sending terminations, test failed!"
             termination_msg = self.out_socket.recv_pyobj()
             # make sure that termination msgs are all empty
             assert len(termination_msg['binary']) == 0, "termination msg is not empty!"
 
         # wait till the collector dies
-        time.sleep(1)
+        time.sleep(0.01)
         # make sure that collector dies after sending termination msgs
         assert not collector_thread.is_alive(), "collector node thread is still alive after num_nodes terminations, test failed!"
         collector_thread.join()
@@ -192,14 +188,12 @@ class TestReqMultiFixtures:
         
 
         # receiving 1 empty termination msg from the otsu_consumer
-        # make sure that otsu_consumer is alive
-        assert consumer_thread.is_alive(), "otsu_consumer node thread died after num_nodes receives and before sending 1 termination, test failed!"
         termination_msg = self.out_socket.recv_pyobj()
         # make sure that termination msg is empty
         assert len(termination_msg['binary']) == 0, "termination msg is not empty!"
             
         # wait till the otsu_consumer dies
-        time.sleep(0.001)
+        time.sleep(0.01)
         # make sure that otsu_consumer dies after sending termination msg
         assert not consumer_thread.is_alive(), "otsu_consumer node thread is still alive after the termination msg, test failed!"
         consumer_thread.join()
@@ -228,14 +222,12 @@ class TestReqMultiFixtures:
         
 
         # receiving 1 empty termination msg from the contours_consumer
-        # make sure that contours_consumer is alive
-        assert consumer_thread.is_alive(), "contours_consumer node thread died after num_nodes receives and before sending 1 termination, test failed!"
         termination_msg = self.out_socket.recv_pyobj()
         # make sure that termination msg is empty
         assert len(termination_msg['contours']) == 0, "termination msg is not empty!"
             
         # wait till the contours_consumer dies
-        time.sleep(0.001)
+        time.sleep(0.01)
         # make sure that contours_consumer dies after sending termination msg
         assert not consumer_thread.is_alive(), "contours_consumer node thread is still alive after the termination msg, test failed!"
         consumer_thread.join()
