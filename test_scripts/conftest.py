@@ -6,6 +6,7 @@ from _pytest.runner import CallInfo
 # pathlib is great
 from pathlib import Path
 from _pytest.main import Session
+from exceptions_test import Contour
 
 
 pytest_plugins = ("html", "sugar")
@@ -71,3 +72,22 @@ def pytest_runtest_makereport(item: Item, call: CallInfo):
         except Exception as e:
             print("ERROR", e)
             pass
+
+
+def pytest_assertrepr_compare(op, left, right):
+    if isinstance(left, int) and isinstance(right, int) and op == "==":
+        return [
+            "equality of 2 integers:",
+            "   vals: {} != {}".format(left, right),
+        ]
+    elif isinstance(left, Contour) and isinstance(right, Contour) and op == "==":
+        if(len(left.contour_array) != len(right.contour_array)):
+            return [
+                "equality of 2 contour lists",
+                "Lengths: {} of contour 1 != {} of contour 2".format(len(left.contour_array), len(right.contour_array))
+            ]
+        else:
+            return [
+                "equality of 2 contour lists",
+                "Contour inner values are different"
+            ]
