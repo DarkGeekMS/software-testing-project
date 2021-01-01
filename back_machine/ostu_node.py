@@ -10,6 +10,9 @@ def get_binary(frame):
         threshold, binary = cv2.threshold(frame , 0 , 255 , cv2.THRESH_OTSU)
         return binary
 
+def random_sum(intval):
+    return random.randint(1,8) + intval
+
 def consumer(addressReceive, addressSend, numTerminate, is_test=False):
     """
     takes video frame and pushes its binary image.
@@ -52,11 +55,7 @@ def consumer(addressReceive, addressSend, numTerminate, is_test=False):
             return
 
     # wait for the other processes to finish    
-    # time.sleep(10)    
-
-def random_sum(intval):
-    return random.randint(1,8) + intval
-
+    # time.sleep(10)
 
 def main():
     """Main driver of ostu consumer node"""
