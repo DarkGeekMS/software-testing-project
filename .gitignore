@@ -131,3 +131,4 @@ dmypy.json
 # log files
 failures.txt
 testplan.csv
+report.html
