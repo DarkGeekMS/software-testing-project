@@ -31,4 +31,5 @@ python -m pytest test_scripts/
 ```
 -   Use `-q` to run in quiet mode.
 -   Use `--full-trace` to print the stack trace of the failures.
--   Use `--testplan <filename>` to enumerate tests with their types without running them.
+-   Use `--testplan=<filename>.csv` to enumerate tests with their description and types without running them into a csv.
+-   Use `--html=<filename>.html` to export an html report of tests and their results.

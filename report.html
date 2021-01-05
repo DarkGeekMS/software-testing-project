@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report.html</h1>
+    <p>Report generated on 04-Jan-2021 at 02:48:41 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>JAVA_HOME</td>
+        <td>C:\Program Files\Android\Android Studio\jre</td></tr>
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "0.13.1", "py": "1.10.0", "pytest": "6.2.1"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.18362-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"html": "3.1.1", "metadata": "1.11.0", "sugar": "0.9.4"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.7.0</td></tr></table>
+    <h2>Summary</h2>
+    <p>17 tests ran in 18.74 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">11 passed</span>, <input checked="true" class="filter" data-test-result="skipped" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">2 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">4 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">1 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">1 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_scripts/exceptions_test.py::TestContours::test_fail_contour</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;exceptions_test.TestContours object at 0x0000015E780FC240&gt;<br/><br/>    def test_fail_contour(self):<br/>    <br/>        global port_counter<br/>        thread = Thread(target = consumer, args = (in_ports[port_counter], out_ports[port_counter], 1, True))<br/>        thread.start()<br/>    <br/>        port_counter += 1<br/>    <br/>        im = cv2.imread(&quot;back_machine/inputs/test_image.png&quot;)<br/>        imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)<br/>        threshold, binary = cv2.threshold(imgray , 0 , 255 , cv2.THRESH_OTSU)<br/>    <br/>        calculated_contours, _ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)<br/>    <br/>        contour1 = Contour(calculated_contours)<br/>    <br/>        in_message = { &#x27;binary&#x27; : binary}<br/>    <br/>        self.in_socket.send_pyobj(in_message)<br/>    <br/>        assert thread.is_alive(), &quot;Contours thread is dead&quot;<br/>    <br/>        thread.join()<br/>        # read return message from output socket<br/>        ret_message = self.out_socket.recv_pyobj()<br/>    <br/>        recieved_contours = ret_message[&#x27;contours&#x27;]<br/>    <br/>        contour2 = Contour(recieved_contours[:-1])<br/>    <br/>&gt;       assert contour1 == contour2<br/><span class="error">E       assert equality of 2 contour lists</span><br/><span class="error">E         Lengths: 6 of contour 1 != 5 of contour 2</span><br/><br/>test_scripts\exceptions_test.py:208: AssertionError<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_scripts/mock_test.py::TestMockOSTU::test_otsu_threshold_fail</td>
+          <td class="col-duration">0.60</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;mock_test.TestMockOSTU object at 0x0000015E7A304D30&gt;<br/>mock_threshold = &lt;MagicMock name=&#x27;threshold&#x27; spec=&#x27;builtin_function_or_method&#x27; id=&#x27;1505288529960&#x27;&gt;<br/><br/>    @mock.patch(&quot;back_machine.ostu_node.cv2.threshold&quot; ,autospec = True)<br/>    def test_otsu_threshold_fail(self ,mock_threshold):<br/>        #set the mock side effects<br/>        mock_threshold.side_effect = [[150,self.binary1], [255, self.binary2]]<br/>        # create a thread for OTSU node<br/>    <br/>        # assert value of message<br/>&gt;       assert ((get_binary(self.img) == self.binary2).all()), &quot;The binary image is incorrect!&quot;<br/><span class="error">E       AssertionError: The binary image is incorrect!</span><br/><span class="error">E       assert False</span><br/><span class="error">E        +  where False = &lt;built-in method all of numpy.ndarray object at 0x0000015E7A2FA940&gt;()</span><br/><span class="error">E        +    where &lt;built-in method all of numpy.ndarray object at 0x0000015E7A2FA940&gt; = array([[0, 0,..., dtype=uint8) == array([[0, 0,..., dtype=uint8)</span><br/><span class="error">E             Use -v to get the full diff.all</span><br/><br/>test_scripts\mock_test.py:47: AssertionError<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_scripts/mock_test.py::TestMockOSTU::test_otsu_random[t4]</td>
+          <td class="col-duration">0.48</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;mock_test.TestMockOSTU object at 0x0000015E7A3068D0&gt;<br/>mock_randint = &lt;MagicMock name=&#x27;randint&#x27; id=&#x27;1505288640496&#x27;&gt;, value = 2, expected = 5<br/><br/>    @pytest.mark.parametrize(&quot;value,expected&quot;, [(1, 5 ), (2, 5 )], ids=[&quot;t3&quot;, &quot;t4&quot;])<br/>    #define mock connection to ostu node<br/>    @mock.patch(&quot;back_machine.ostu_node.random.randint&quot;)<br/>    def test_otsu_random(self, mock_randint, value, expected):<br/>    <br/>        mock_randint.side_effect = [4 , 5]<br/>&gt;       assert random_sum(value) == expected, &quot;summation is wrong&quot;<br/><span class="error">E       AssertionError: summation is wrong</span><br/><span class="error">E       assert equality of 2 integers:</span><br/><span class="error">E            vals: 6 != 5</span><br/><br/>test_scripts\mock_test.py:56: AssertionError<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_scripts/skip_xfail_test.py::TestSkipOTSU::test_wrong_input</td>
+          <td class="col-duration">5.02</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;skip_xfail_test.TestSkipOTSU object at 0x0000015E7A33BDA0&gt;<br/><br/>    @pytest.mark.xfail(port_counter != 3, reason=&quot;This test cannot pass as port counter is wrong&quot; ,raises=RuntimeError)<br/>    def test_wrong_input(self):<br/>        &quot;&quot;&quot;<br/>        Test the failure behaviour of OTSU node with invalid inputs<br/>        TEST TYPE : conditional xfail marker / warnings<br/>        &quot;&quot;&quot;<br/>        # test OTSU node with invalid input type<br/>        global port_counter<br/>        # create a thread for OTSU node<br/>        thread = Thread(target = consumer, args = (in_ports[port_counter], out_ports[port_counter], 1, True))<br/>        # start OTSU node thread<br/>        thread.start()<br/>        port_counter += 1<br/>        # send an integer through input socket (invalid input type)<br/>        in_message = { &#x27;frame&#x27; : 1 }<br/>        self.in_socket.send_pyobj(in_message)<br/>        # assert whether the thread is dead<br/>        time.sleep(5)<br/>&gt;       assert thread.is_alive(), &quot;OTSU node thread died, incorrect input!&quot;<br/><span class="error">E       AssertionError: OTSU node thread died, incorrect input!</span><br/><span class="error">E       assert False</span><br/><span class="error">E        +  where False = &lt;bound method Thread.is_alive of &lt;Thread(Thread-12, stopped 13540)&gt;&gt;()</span><br/><span class="error">E        +    where &lt;bound method Thread.is_alive of &lt;Thread(Thread-12, stopped 13540)&gt;&gt; = &lt;Thread(Thread-12, stopped 13540)&gt;.is_alive</span><br/><br/>test_scripts\skip_xfail_test.py:158: AssertionError<br/> ------------------------------Captured stderr call------------------------------ <br/>Exception in thread Thread-12:
+Traceback (most recent call last):
+  File &quot;C:\Users\karashily\AppData\Local\Programs\Python\Python37\lib\threading.py&quot;, line 917, in _bootstrap_inner
+    self.run()
+  File &quot;C:\Users\karashily\AppData\Local\Programs\Python\Python37\lib\threading.py&quot;, line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File &quot;C:\Users\karashily\Desktop\Testing\software-testing-project\back_machine\ostu_node.py&quot;, line 45, in consumer
+    if len(frame) == 0:
+TypeError: object of type &#x27;int&#x27; has no len()
+
+<br/></div></td></tr></tbody>
+      <tbody class="xfailed results-table-row">
+        <tr>
+          <td class="col-result">XFailed</td>
+          <td class="col-name">test_scripts/skip_xfail_test.py::TestSkipOTSU::test_wrong_port</td>
+          <td class="col-duration">5.13</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;skip_xfail_test.TestSkipOTSU object at 0x0000015E780D6E10&gt;<br/><br/>    @pytest.mark.xfail(run=True, reason=&quot;This test cannot succeed as no output socket is given&quot;)<br/>    def test_wrong_port(self):<br/>        &quot;&quot;&quot;<br/>        Test the failure behaviour of OTSU node upon connection with wrong ports<br/>        TEST TYPE : skippable xfail marker<br/>        &quot;&quot;&quot;<br/>        # test OTSU node with invalid port<br/>        global port_counter<br/>        # create a thread for OTSU node (don&#x27;t pass output port)<br/>        thread = Thread(target = consumer, args = (in_ports[port_counter], None, 1, True))<br/>        # start OTSU node thread<br/>        thread.start()<br/>        port_counter += 1<br/>        # send an empty list through input socket<br/>        in_message = { &#x27;frame&#x27; : list() }<br/>        self.in_socket.send_pyobj(in_message)<br/>        # assert whether the thread is dead<br/>        time.sleep(5)<br/>&gt;       assert thread.is_alive(), &quot;OTSU node thread died, incorrect port!&quot;<br/><span class="error">E       AssertionError: OTSU node thread died, incorrect port!</span><br/><span class="error">E       assert False</span><br/><span class="error">E        +  where False = &lt;bound method Thread.is_alive of &lt;Thread(Thread-13, stopped 16880)&gt;&gt;()</span><br/><span class="error">E        +    where &lt;bound method Thread.is_alive of &lt;Thread(Thread-13, stopped 16880)&gt;&gt; = &lt;Thread(Thread-13, stopped 16880)&gt;.is_alive</span><br/><br/>test_scripts\skip_xfail_test.py:183: AssertionError<br/> ------------------------------Captured stderr call------------------------------ <br/>Exception in thread Thread-13:
+Traceback (most recent call last):
+  File &quot;C:\Users\karashily\AppData\Local\Programs\Python\Python37\lib\threading.py&quot;, line 917, in _bootstrap_inner
+    self.run()
+  File &quot;C:\Users\karashily\AppData\Local\Programs\Python\Python37\lib\threading.py&quot;, line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File &quot;C:\Users\karashily\Desktop\Testing\software-testing-project\back_machine\ostu_node.py&quot;, line 32, in consumer
+    consumer_sender.connect(addressSend)
+  File &quot;zmq\backend\cython\socket.pyx&quot;, line 574, in zmq.backend.cython.socket.Socket.connect
+TypeError: expected str, got: None
+
+<br/></div></td></tr></tbody>
+      <tbody class="xpassed results-table-row">
+        <tr>
+          <td class="col-result">XPassed</td>
+          <td class="col-name">test_scripts/skip_xfail_test.py::TestSkipOTSU::test_terminate</td>
+          <td class="col-duration">0.02</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">test_scripts/skip_xfail_test.py::TestSkipOTSU::test_connection</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;C:\\Users\\karashily\\Desktop\\Testing\\software-testing-project\\test_scripts\\skip_xfail_test.py&#x27;, 56, &quot;Skipped: The connection test is skipped as it&#x27;s already included in output test&quot;)<br/></div></td></tr></tbody>
+      <tbody class="skipped results-table-row">
+        <tr>
+          <td class="col-result">Skipped</td>
+          <td class="col-name">test_scripts/skip_xfail_test.py::TestSkipOTSU::test_output</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">(&#x27;C:\\Users\\karashily\\Desktop\\Testing\\software-testing-project\\test_scripts\\skip_xfail_test.py&#x27;, 84, &quot;Skipped: Requires OpenCV version &#x27;4.4.0&#x27;&quot;)<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/exceptions_test.py::TestContours::test_contours_output</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/exceptions_test.py::TestContours::test_type_error</td>
+          <td class="col-duration">1.03</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stderr call------------------------------ <br/>Exception in thread Thread-2:
+Traceback (most recent call last):
+  File &quot;C:\Users\karashily\AppData\Local\Programs\Python\Python37\lib\threading.py&quot;, line 917, in _bootstrap_inner
+    self.run()
+  File &quot;C:\Users\karashily\AppData\Local\Programs\Python\Python37\lib\threading.py&quot;, line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File &quot;C:\Users\karashily\Desktop\Testing\software-testing-project\front_machine\contours_node.py&quot;, line 38, in consumer
+    if len(data) == 0:
+TypeError: object of type &#x27;float&#x27; has no len()
+
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/exceptions_test.py::TestContours::test_thread_alive</td>
+          <td class="col-duration">1.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stderr call------------------------------ <br/>Exception in thread Thread-3:
+Traceback (most recent call last):
+  File &quot;C:\Users\karashily\AppData\Local\Programs\Python\Python37\lib\threading.py&quot;, line 917, in _bootstrap_inner
+    self.run()
+  File &quot;C:\Users\karashily\AppData\Local\Programs\Python\Python37\lib\threading.py&quot;, line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File &quot;C:\Users\karashily\Desktop\Testing\software-testing-project\front_machine\contours_node.py&quot;, line 38, in consumer
+    if len(data) == 0:
+TypeError: object of type &#x27;float&#x27; has no len()
+
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/exceptions_test.py::TestContours::test_valid_contour</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/fixtures_test.py::TestReqMultiFixtures::test_input_terminate</td>
+          <td class="col-duration">1.41</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/fixtures_test.py::TestReqMultiFixtures::test_collector_terminate</td>
+          <td class="col-duration">0.52</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/fixtures_test.py::TestReqMultiFixtures::test_otsu_terminate</td>
+          <td class="col-duration">0.03</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/fixtures_test.py::TestReqMultiFixtures::test_contours_terminate</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/fixtures_test.py::TestReqMultiFixtures::test_output_terminate</td>
+          <td class="col-duration">1.02</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/mock_test.py::TestMockOSTU::test_otsu_threshold_pass</td>
+          <td class="col-duration">0.49</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_scripts/mock_test.py::TestMockOSTU::test_otsu_random[t3]</td>
+          <td class="col-duration">0.70</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody></table></body></html>
