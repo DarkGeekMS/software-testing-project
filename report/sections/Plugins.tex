@@ -1,0 +1,63 @@
+\subsection{Description}
+\textbf{Pytest plugins} offers a way to extend \textbf{PyTest} core functionalities and add user-defined behaviors and functionalities that help with their testing job through \textbf{hook functions}. 
+\textbf{PyTest plugins} can also be used to integrate with other frameworks like \textbf{pytest-django}, which is a plugin for \textbf{PyTest} that provides functionalities for integration with the web-development framework \textbf{Django}.
+Also, \textbf{PyTest} offers the functionality of defining your own defined plugin for your own software, and also the ability to wrap it up into a \textbf{PyPI} package that can be installed by others.
+
+\subsection{Writing Plugins}
+A plugin contains one or multiple \textbf{hook functions}. \textbf{\nameref{sec:hooks}} section explains the basics and details of how you can write a \textbf{hook function} yourself. \textbf{PyTest} implements all aspects of configuration, collection, running and reporting by calling well specified hooks.
+
+\subsubsection{"testplan" plugin}
+We used \textbf{PyTest}’s functionality of writing plugins to write a utility plugin called \textbf{“testplan”} which enumerates tests into a \textbf{csv} file with their description and types without running them. This plugin can be used for reports and documentations of tests.
+The plugin can be used by specifying a \textbf{csv} file name while running the tests:
+\begin{bash}
+python -m pytest test_scripts/ --testplan=<filename>.csv
+\end{bash}
+the plugin is implemented using two \textbf{hook functions}, namely \textbf{pytest\_addoption} which is used to define the \textbf{“--testplan"} parameter while running the tests:
+\begin{python}
+def pytest_addoption(parser):
+    testplan = parser.getgroup('testplan')
+    testplan.addoption("--testplan",
+        ...
+    )
+\end{python}
+and \textbf{pytest\_collection\_modifyitems} which is called on tests by \textbf{pytest} before they are run:
+\begin{python}
+ def pytest_collection_modifyitems(session, config, items):
+    path = config.getoption('testplan')
+    if path:
+        with open(path, mode='w', newline='') as fd:
+            writer = csv.writer(fd, delimiter=',', quotechar='"',
+            ...
+                writer.writerow([title, description, markers])
+        ...
+\end{python}
+
+\newpage
+\subsection{Third-party Plugins}
+
+\subsubsection{Installation}
+A third-party plugin can be easily done with \textbf{pip}:
+\begin{bash}
+pip install pytest-NAME
+pip uninstall pytest-NAME
+\end{bash}
+If a plugin is installed, \textbf{pytest} automatically finds and integrates it, there is no need to activate it.
+Examples of third-party plugins are: \textbf{pytest-django}: write tests for \textbf{django} apps, using pytest integration, or \textbf{pytest-cov}: coverage reporting, compatible with distributed testing.
+
+\subsubsection{Usage}
+You can require plugins in a test module or a \textbf{conftest} file using \textbf{pytest\_plugins}:
+\begin{python}
+pytest_plugins = ("myapp.testsupport.myplugin",)
+\end{python}
+When the test module or \textbf{conftest} plugin is loaded the specified plugins will be loaded as well.
+
+\subsubsection{"pytest-html" plugin}
+An Example of third-party plugins is \textbf{pytest-html} which offers the functionality of reporting the test results into an \textbf{html} report that is well represented and organized. Such report can be used for documentation of the test process and its progress.
+\textbf{pytest-html} can be installed using:
+\begin{bash}
+Pip install pytest-html
+\end{bash}
+And can be used by defining an \textbf{html} file when running test through:
+\begin{bash}
+python -m pytest test_scripts/ --html=<filename>.html
+\end{bash}
