@@ -4,6 +4,8 @@ import time
 import zmq
 import cv2
 import math
+import warnings
+import numpy as np
 
 def consumer(addressReceive, addressSend, numTerminate, is_test=False):
     """
@@ -35,9 +37,15 @@ def consumer(addressReceive, addressSend, numTerminate, is_test=False):
         work = consumer_receiver.recv_pyobj()
         data = work['binary']
 
+
+        if(not isinstance(data, np.ndarray)):
+            warnings.warn("Passed data is not numpy array", UserWarning)
+
+
         if len(data) == 0:
             TerminationCount +=1
             continue
+
 
         #get the contours
         contours, _ = cv2.findContours(data, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)

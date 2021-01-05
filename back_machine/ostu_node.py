@@ -5,6 +5,8 @@ import zmq
 import cv2
 import math
 import random
+import numpy as np
+import warnings
 
 
 def get_binary(frame):
@@ -41,6 +43,9 @@ def consumer(addressReceive, addressSend, numTerminate, is_test=False):
         #receive the frame (grayScaled)
         work = consumer_receiver.recv_pyobj()
         frame = work['frame']
+
+        if(not isinstance(frame, np.ndarray)):
+            warnings.warn("Passed data is not numpy array", UserWarning)
 
         if len(frame) == 0:
             TerminationCount +=1

@@ -7,6 +7,8 @@ import time
 import numpy as np
 from threading import Thread
 from front_machine.contours_node import consumer
+from back_machine.ostu_node import consumer as otsu_consumer
+
 import time
 import warnings
 
@@ -38,12 +40,16 @@ in_ports = ["tcp://127.0.0.1:5999",
             "tcp://127.0.0.1:6000",
             "tcp://127.0.0.1:6001",
             "tcp://127.0.0.1:6002",
-            "tcp://127.0.0.1:6003"]
+            "tcp://127.0.0.1:6003",
+            "tcp://127.0.0.1:6004",
+            "tcp://127.0.0.1:6005"]
 out_ports = ["tcp://127.0.0.1:6666",
             "tcp://127.0.0.1:6667",
             "tcp://127.0.0.1:6668",
             "tcp://127.0.0.1:6669",
-            "tcp://127.0.0.1:6670"]
+            "tcp://127.0.0.1:6670",
+            "tcp://127.0.0.1:6671",
+            "tcp://127.0.0.1:6672"]
 
 # define pytest fixture to allocate in ports
 @pytest.fixture()
@@ -98,7 +104,7 @@ class TestContours:
 
         # assert type of message
 
-    def test_type_error(self):
+    def test_contour_no_recieve(self):
 
         global port_counter
 
@@ -119,8 +125,29 @@ class TestContours:
 
             ret_message = self.out_socket.recv_pyobj(flags = zmq.NOBLOCK)
 
+    def test_otsu_no_recieve(self):
 
-    def test_thread_alive(self):
+        global port_counter
+
+        with pytest.raises(zmq.ZMQError):
+
+            thread = Thread(target = otsu_consumer, args = (in_ports[port_counter], out_ports[port_counter], 1, True))
+            thread.start()
+
+            port_counter += 1
+
+            in_message = { 'frame' : 0.5}
+
+            self.in_socket.send_pyobj(in_message)
+
+            time.sleep(1)
+
+            thread.join()
+
+            ret_message = self.out_socket.recv_pyobj(flags = zmq.NOBLOCK)
+
+
+    def test_contour_thread_alive(self):
 
         global port_counter
 
@@ -139,8 +166,25 @@ class TestContours:
 
             thread.join()
 
-            if(not thread.is_alive()):
-                warnings.warn("Thread is dead", UserWarning)
+    def test_otsu_thread_alive(self):
+
+        global port_counter
+
+        with pytest.warns(UserWarning):
+
+            thread = Thread(target = otsu_consumer, args = (in_ports[port_counter], out_ports[port_counter], 1, True))
+            thread.start()
+
+            in_message = { 'frame' : 0.5}
+
+            port_counter += 1
+
+            self.in_socket.send_pyobj(in_message)
+
+            time.sleep(1)
+
+            thread.join()
+
 
 
     def test_valid_contour(self):
