@@ -147,7 +147,7 @@ class TestContours:
             ret_message = self.out_socket.recv_pyobj(flags = zmq.NOBLOCK)
 
 
-    def test_contour_thread_alive(self):
+    def test_contour_user_warning(self):
 
         global port_counter
 
@@ -166,7 +166,7 @@ class TestContours:
 
             thread.join()
 
-    def test_otsu_thread_alive(self):
+    def test_otsu_user_warning(self):
 
         global port_counter
 

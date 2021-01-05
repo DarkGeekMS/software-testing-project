@@ -1,4 +1,2 @@
 test_scripts/exceptions_test.py::TestContours::test_fail_contour
 test_scripts/mock_test.py::TestMockOSTU::test_otsu_threshold_fail
-test_scripts/mock_test.py::TestMockOSTU::test_otsu_random[t4]
-test_scripts/skip_xfail_test.py::TestSkipOTSU::test_wrong_input
