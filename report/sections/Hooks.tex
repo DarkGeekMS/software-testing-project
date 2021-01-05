@@ -1,0 +1,19 @@
+\subsection{Description}
+\textbf{pytest} test suite reports all test results, whether it is a pass or a failure. There can be a huge number of test cases, which makes the failures very difficult to track through the terminal. However, \textbf{pytest} calls \emph{hook} functions from registered \emph{plugins} for any given hook specification. Hook functions can be used to organize tests execution, but, more importantly, it can be used to dump all test failures into \texttt{failures.txt} file, which can be much easier to search through. \textbf{pytest} can automatically pick up the configured hooks and execute the desired tests, in order to generate the failures file.
+
+\subsection{Usage}
+\textbf{Hook functions} are defined in \textbf{pytest} configuration file, which is named \texttt{conftest.py}. This file can be detected directly by \textbf{pytest} for both \emph{plugins} and \emph{hooks}. To define a hook function, \emph{@pytest.hookimpl()} python decorator is used. Hooks are covered in our test scripts under \texttt{test\_scripts/conftest.py}. \\
+
+To define a hook function, start test session and link the failures text file :
+\begin{python}
+@pytest.hookimpl()
+def pytest_sessionstart(session: Session):
+    ...
+\end{python}
+
+To define a hook wrapper function that run tests and make the report :
+\begin{python}
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item: Item, call: CallInfo):
+    ...
+\end{python}

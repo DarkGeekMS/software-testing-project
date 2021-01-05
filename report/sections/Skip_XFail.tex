@@ -1,0 +1,64 @@
+\subsection{Introduction}
+Any software under test \emph{(SUT)} can have a set of infeasible test cases that can arise from dependencies issue or unimplemented functionalities. \textbf{pytest} offers some robust features to handle such cases using \emph{skip} and \emph{xfail} markers. In this section, we discuss both features in a bit of details. The scripts can be found under \texttt{test\_scripts/skip\_xfail\_test.py}, where the \emph{OTSU node} of the software under test is covered using both \emph{node} and \emph{edge} \textbf{coverage}. The script contains $5$ test cases :
+\begin{enumerate}
+    \item \textbf{test\_connection()} : node connection with outer sockets \emph{[SKIPPED]}.
+    \item \textbf{test\_output()} : node output validity \emph{[PASSED]}.
+    \item \textbf{test\_terminate()} : termination behaviour of node \emph{[XPASSED]}.
+    \item \textbf{test\_wrong\_input()} : node behaviour with wrong inputs \emph{[FAILED]}.
+    \item \textbf{test\_wrong\_port()} : node behaviour with wrong ports \emph{[XFAILED]}.
+\end{enumerate}
+
+\subsection{PyTest Skip Marker}
+
+\subsubsection{Description}
+\textbf{Skip marker} is usually used with tests that are expected to pass only under certain conditions. In other words, this feature is used by \textbf{pytest} to execute test cases, only if some conditions are met. This can be very useful for :
+\begin{enumerate}
+    \item Skipping test cases of unimplemented functionalities, which is crucial for \emph{test-driven development}.
+    \item Skipping test cases on platform migration. This is used when migrating the software into another platform, where some implementations are not expected to run properly.
+    \item Skipping test cases with unmet dependencies, where requirements for running code are unmet, due to incompatible versions or missing dependencies.
+\end{enumerate}
+
+\subsubsection{Usage}
+\textbf{Skip marker} is mainly used through \emph{@pytest.mark.skip()} or \emph{@pytest.mark.skipif()} python decorators. It can be used to skip a certain test case and even a complete class or module. This feature is covered in the scripts by using both markers on \emph{test functions} or \emph{text classes}. \\
+
+\emph{@pytest.mark.skip()} is used to skip a test case immediately without consideration :
+
+\begin{python}
+@pytest.mark.skip(reason="unimplemented functionality")
+def test_case():
+    ...
+\end{python}
+
+Meanwhile, \emph{@pytest.mark.skipif()} is used to skip a test case when a certain condition is met :
+
+\begin{python}
+import sys
+@pytest.mark.skipif(sys.version_info < (3, 7), 
+reason="requires python3.7 or higher")
+def test_case():
+    ...
+\end{python}
+
+\subsection{PyTest XFail Marker}
+
+\subsubsection{Description}
+\textbf{XFail marker} is usually used to indicate that a test is expected to fail. A common example is a test for a feature not yet implemented, or a bug not yet fixed. However, if the test passes, it will be reported as \emph{xpass}. Moreover, if the test fails, it will not be reported as a failure. The tester can mark a test as \emph{strict non-runnable xfail}, which will skip running the test. This can be useful to clean test report from any tests that are expected to fail, in order to only focus on meaningful failures.
+
+\subsubsection{Usage}
+\textbf{XFail marker} is mainly used through \emph{@pytest.mark.xfail()} python decorator. However, a set of parameters can be specified for extra functionalities :
+\begin{enumerate}
+    \item \textbf{condition} : defines a certain condition upon which the test is expected to fail.
+    \item \textbf{reason} : defines the reason why test is expected to fail.
+    \item \textbf{raises} : defines a set of exceptions that will be raised if test fails.
+    \item \textbf{run} : a boolean that defines whether to run the test or totally ignore it.
+    \item \textbf{strict} : a boolean that defines whether the test is a strict \emph{xfail}.
+\end{enumerate}
+
+\begin{python}
+import sys
+@pytest.mark.xfail(sys.platform == "win32",
+reason="bug in a 3rd party library", raises=RuntimeError,
+run=False, strict=True)
+def test_case():
+    ...
+\end{python}

@@ -1,0 +1,16 @@
+\subsection{Software Under Test (SUT)}
+
+In this work, we explore the features of \textbf{pytest} unit testing tool. For the purpose of showing the true power of \textbf{pytest} and how it can scale to a large complex software. Our software under test \emph{(SUT)} is a \texttt{distributed contour extraction system}. The software, basically, takes an input video through \emph{input node}, which divides it into frames and sends them to \emph{OTSU consumer node}. Then, the frames are binarized and sent to \emph{collector node}, which collects the binarized frames and sends them to \emph{Contour consumer node}. Then, the contours are extracted from the binarized frames and sent to the \emph{output node}, which dumps the outputs in a file. The software modules communicate with each others through \emph{TCP} sockets, and each module contains a set of functions that are required to obtain its output. \\
+
+In our experiments, we focus on covering the main broad features of \textbf{pytest} on our code. We test multiple functionalities of different modules and use that to express the usage of \textbf{pytest} features and how it can scale to such complex functionalities. The main testing scheme uses \emph{TCP} sockets to test nodes functionalities, however some tests, also, use direct function calls, in order to fairly cover the whole \emph{SUT}.
+
+\subsection{Code Structure}
+
+Now, let's discuss the code structure in a bit of details. The submitted code is structured as follows :
+\begin{itemize}
+    \item \textbf{back\_machine folder} : contains the code for the first three nodes \emph{(input, OTSU and collector)} and folders for input and configuration.
+    \item \textbf{front\_machine folder} : contains the code for the \emph{contours} and \emph{output} nodes and folders for output files.
+    \item \textbf{test\_scripts folder} : contains the main written test scripts with test cases and \textbf{pytest} functionalities.
+    \item \textbf{sys\_init.sh} : a shell script for running the system.
+    \item \textbf{README.md} : contains software description, installation and usage guidelines.
+\end{itemize}

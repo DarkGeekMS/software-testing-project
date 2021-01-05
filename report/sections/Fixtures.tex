@@ -1,0 +1,109 @@
+% fixtures intuition
+\subsection{Introduction}
+Software Test Fixtures initialize test functions. They provide a fixed baseline so that tests execute reliably and produce consistent and repeatable results. \textbf{PyTest} Fixtures offer dramatic improvements over the classic \textbf{xUnit} style of setup/teardown functions:
+
+\begin{enumerate}
+    \item Fixtures are activated by declaring their use from test functions, modules, classes or whole projects.
+    \item Fixtures are implemented in a modular manner, as each fixture can use other fixtures.
+    \item Fixture management scales from simple unit to complex functional testing, allowing to re-use fixtures across function, class, module or whole test session scopes.
+\end{enumerate}
+
+\subsection{SUT Termination testing}
+% termination testing motivation
+As our \textbf{SUT} generates different threads that communicate with each other and must not terminate before getting acknowledges from their receivers that they finished their work and terminated correctly, so I put test scripts that test the termination of each node (input, OTSU, collector, contour-extractor, output) in \texttt{test\_scripts/fixtures\_test.py} file.
+
+\subsection{Fixtures features}
+% autouse
+\subsubsection{Autouse fixtures}
+to test each node function, we need to initialize the sockets that will communicate with it as its senders or receivers, so we used \textbf{init\_sockets} fixture to do so, and we made its \textbf{autouse} parameter to be true to be called by default with each test function.
+
+\begin{python}
+@pytest.fixture(autouse=True)
+def _init_sockets(...):
+    ...
+\end{python}
+
+% markers
+\subsubsection{Fixtures can introspect the requesting test context}
+different nodes have different socket types (bind / connect), so we need to initialize tests' sockets opposite of their types in nodes. to make \textbf{init\_sockets} generic, we specified PyTest \textbf{markers} to test functions so that the fixture can access the \textbf{marker} type through \textbf{request} object.
+
+\begin{python}
+def init_sockets(...):
+    socket_type = request.node.get_closest_marker("type").args[0]
+
+@pytest.mark.type('connect')
+def test_input_terminate(...):
+    ...
+\end{python}
+
+
+% static and dynamic fixture scope
+\subsubsection{Fixture scope: sharing fixtures}
+Fixtures are created when first requested by a test, and are destroyed based on their scope:
+\begin{enumerate}
+
+    \item \textbf{function}: the default scope, the fixture is destroyed at the end of the test.
+
+    \item \textbf{class}: the fixture is destroyed during teardown of the last test in the class.
+
+    \item \textbf{module}: the fixture is destroyed during teardown of the last test in the module.
+
+    \item \textbf{package}: the fixture is destroyed during teardown of the last test in the package.
+
+    \item \textbf{session}: the fixture is destroyed at the end of the test session.
+
+\end{enumerate}
+
+we used module scope with fixtures that defines global objects that need to be instantiated once for all tests in the module like in \textbf{context} fixture, but used function scope with \textbf{init\_sockets} fixture as it needs to be invoked for each test. PyTest allows us to use dynamic scopes that change for the same fixture.
+
+% teardown code
+\subsubsection{Fixture finalization and teardown code}
+teardown code is the code that is executed when the fixture is destroyed. to include teardown code we need to use \textbf{yield} statement instead of \textbf{return} and place teardown code after \textbf{yield} statement. we used this feature to close all sockets at the end of each test (i.e. when \textbf{init\_sockets} is destroyed) to be reused again.
+
+\begin{python}
+def init_sockets(...):
+    ...
+    yield sockets
+    
+    sockets.in_socket.close()
+    sockets.out_socket.close()
+\end{python}
+
+% Modularity
+\subsubsection{Modularity}
+In addition to using fixtures in test functions, fixture functions can use other fixtures themselves. This contributes to a modular design of your fixtures as classes and allows re-use of framework-specific fixtures across many projects.
+
+we used this feature to make two classes to implement the logic of \textbf{connect} and \textbf{bind} types of sockets call objects from these classes in \textbf{init\_sockets} fixture.
+
+
+\begin{python}
+class BindSockets:
+    def __init__(self,...):
+        self.init_in_socket = self.init_in_socket_bind()
+        self.init_out_socket = self.init_out_socket_bind()
+    
+    def init_in_socket_bind(self):
+        ...
+
+    def init_out_socket_bind(self):
+        ...
+
+class ConnectSockets:
+    def __init__(self,...):
+        self.init_in_socket = self.init_in_socket_connect()
+        self.init_out_socket = self.init_out_socket_connect()
+    
+    def init_in_socket_connect(self):
+        ...
+
+    def init_out_socket_connect(self):
+        ...
+    
+@pytest.fixture(scope = 'function')
+def init_sockets(...):
+    if socket_type == 'connect':
+        sockets = ConnectSockets(...)
+    elif socket_type == 'bind':
+        sockets = BindSockets(...)
+    
+\end{python}

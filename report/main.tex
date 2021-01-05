@@ -1,0 +1,176 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{authblk}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{import}
+\usepackage{docmute}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage[legalpaper, margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{12} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{12}  % for normal
+
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+
+\usepackage{listings}
+
+% bash style for highlighting
+\newcommand\bashstyle{\lstset{
+language=bash,
+basicstyle=\ttm,
+otherkeywords={self},             % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+showstringspaces=false            % 
+}}
+
+% Python style for highlighting
+\newcommand\pythonstyle{\lstset{
+language=Python,
+basicstyle=\ttm,
+otherkeywords={self},             % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+showstringspaces=false            % 
+}}
+
+
+% Python environment
+\lstnewenvironment{python}[1][]
+{
+\pythonstyle
+\lstset{#1}
+}
+{}
+
+% bash environment
+\lstnewenvironment{bash}[1][]
+{
+\bashstyle
+\lstset{#1}
+}
+{}
+
+% Python for external files
+\newcommand\pythonexternal[2][]{{
+\pythonstyle
+\lstinputlisting[#1]{#2}}}
+
+% Python for inline
+\newcommand\pythoninline[1]{{\pythonstyle\lstinline!#1!}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Software Testing - CMP461 - Elective2}
+\lhead{Team Monday - SEM Fall 2020}
+\rfoot{Page \thepage}
+
+\begin{document}
+
+
+\begin{center}
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+{ \huge \bfseries Software Testing using Pytest}\\[0.5cm] % Title of your document
+{ \Large \bfseries Team Monday}\\[0.5cm]
+
+
+%----------------------------------------------------------------------------------------
+%	AUTHOR SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{minipage}{0.8\textwidth}
+\begin{center} 
+
+\textbf{Ahmed Mohamed Zakaria} \\
+\texttt{Sec.1, BN.3} \\
+\texttt{Email: ahmed.elkarashily98@eng-st.cu.edu.eg} \\[0.3cm]
+
+\textbf{Remonda Talaat Eskarous} \\
+\texttt{Sec.1, BN.19} \\
+\texttt{Email: remonda.bastawres99@eng-st.cu.edu.eg} \\[0.3cm]
+
+\textbf{Mohamed Ahmed Mohamed Ahmed} \\
+\texttt{Sec.2, BN:10} \\
+\texttt{Email: mohamed.dardir98@eng-st.cu.edu.eg} \\[0.3cm]
+
+\textbf{Mohamed Shawky Zaky} \\
+\texttt{Sec.2, BN.15} \\
+\texttt{Email: mohamed.sabae99@eng-st.cu.edu.eg} \\[0.3cm]
+
+\textbf{Mohamed Ramzy Helmy} \\
+\texttt{Sec.2, BN.13} \\
+\texttt{Email: mohamed.ibrahim98@eng-st.cu.edu.eg} \\[0.3cm]
+
+\end{center}
+\end{minipage}\\[1cm]
+
+\end{center}
+
+\begin{scriptsize}
+\tableofcontents
+\end{scriptsize}
+
+
+    
+\section{System Overview}
+\input{sections/System}
+
+\section{PyTest Overview and Installation}
+\input{sections/Installation}
+
+\section{Assert Statements}
+\input{sections/Assert}
+
+\section{Assertions explanations}
+\label{sec:explainations}
+\input{sections/Fail_definition}
+
+\section{Exceptions \& Warnings}
+\label{sec:exceptions}
+\input{sections/Exceptions_Warnings}
+
+\section{Fixtures}
+\label{sec:fixtures}
+\input{sections/Fixtures}
+
+\section{Skip and Xfail}
+\label{sec:skip_xfail}
+\input{sections/Skip_XFail}
+
+\section{Plugins}
+\label{sec:plugins}
+\input{sections/Plugins}
+
+\section{Hooks}
+\label{sec:hooks}
+\input{sections/Hooks}
+
+\section{Mock Property}
+\label{sec:mock}
+\input{sections/Mock}
+
+\section{Work Load Distribution}
+\input{sections/workload}
+ 
+\bibliographystyle{plain}
+\bibliography{references}
+\nocite{*}
+\end{document}

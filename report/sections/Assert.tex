@@ -1,0 +1,36 @@
+In PyTest, You can assert the correction of test statements using the keyword \textbf{assert}. \\
+For example:
+
+\subsection{Basic Usage}
+
+\begin{python}
+def f():
+    return 4
+    
+def test_assert():
+    x = 4
+    assert x == f()
+\end{python}
+
+In the SUT it has been useful in almost all test cases for example, When testing that the returned list of contours from the contours node is not empty in \textbf{test\_contours\_output()}: \\
+
+\begin{python}
+def test_contours_output(self):
+    ........
+    thread.start()
+    ........
+    ret_message = self.out_socket.recv_pyobj()
+    contours = ret_message['contours']
+
+    assert len(contours) > 0, "Contours list are empty"
+\end{python}
+
+Another example when testing that the returned contours are the same as the expected contours and no data loss is happened when transmitting the data between the nodes as in \textbf{test\_valid\_contour()}
+
+\begin{python}
+def test_valid_contour(self):
+    .....
+    assert contour1 == contour2
+\end{python}
+
+

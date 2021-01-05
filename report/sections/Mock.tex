@@ -1,0 +1,15 @@
+\subsection{Description} 
+In \emph{Python}, an \emph{API} call can $1,000$ seconds to run. Consequently, when testing an interface (or wrapper) that calls an $API$ function, it would consume a lot of time to perform a simple test. One way to overcome this is to fix a correct return of the $API$ call for each test, in order to avoid long call times. This is the main use of the \textbf{mocks} in \textbf{pytest}, which allow the tester to set a fixed correct return of the $API$ calls. This enables fast and effective run of the tests, which is important for continuous integration and development \emph{(CI/CD)}. We are motivated to include \textbf{mocks} in our experiments, as our \emph{SUT} contains a decent set of $API$ calls of external libraries. We include some tests that use \textbf{mocks} in our scripts, in order to speed up execution. However, not all tests use \textbf{mocks}, as we need to test \emph{dynamic behaviour} and for the purpose of \emph{integration testing}.
+
+\subsection{Usage}
+We can define \textbf{mocks} for \textbf{pytest} by using \emph{@mock.patch()} python decorator. This takes the target $API$ function as a parameter and define a single or multiple fixed outputs of it later in the code. We include the use of \textbf{mocks} in our test scripts under \texttt{test\_scripts/mock\_test.py}. \\
+
+The exact syntax of \textbf{mocks} definition in \textbf{pytest} is shown as follows :
+\begin{python}
+@mock.patch("api_name.function_name" ,autospec = True)
+    def test_function(self ,mock_variable):
+    ...
+    mock_variable.side_effect = [..]
+    ...
+\end{python}
+We notice that a \textbf{mock} variable is passed to the test function, which is used to set the \emph{side effect} of the \textbf{mock}. The \emph{side effect} of the \textbf{mock} is a list of fixed returns of the $API$ function call.

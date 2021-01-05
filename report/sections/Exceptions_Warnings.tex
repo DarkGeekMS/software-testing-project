@@ -1,0 +1,37 @@
+PyTest provides different methods to test some unexpected scenarios that throws exceptions and warnings. It helps to ensure that the exceptions and warnings are thrown correctly in the unexpected scenarios.
+\subsection{Exceptions}
+
+PyTest can assert about the expected exceptions using \textbf{pytest.raises()} in the context manager.
+They are used on the SUT to test the failure when passing a non-valid input to the contours node or the otsu node and asserting that nothing will be returned from the contours node or the otsu node and \textbf{ZMQError} exception will be thrown in \textbf{test\_contour\_thread\_alive() and test\_otsu\_thread\_alive()}
+
+\begin{python}
+def test_contour_thread_alive(self):
+    ......
+    with pytest.raises(zmq.ZMQError):
+        ......
+        in_message = { 'binary' : 0.5} #passing not valid input
+        ......
+        ret_message = self.out_socket.recv_pyobj(flags = zmq.NOBLOCK)
+\end{python}
+
+It throws a \textbf{ZMQError} within the context manager.
+
+\subsection{Warnings}
+
+In a similar way to asserting that exceptions are thrown. In PyTest you can assert that a specific warning happens using \textbf{pytest.warns} inside the SUT \\
+For example:
+\begin{python}
+def test_warning():
+    with pytest.warns(UserWarning):
+        warnings.warn("my warning", UserWarning)
+\end{python}
+In the the case of sending invalid inputs to the otsu and contours node and testing whether there is a UserWarning will show up, is evaluated in \textbf{test\_contour\_user\_warning() and test\_otsu\_user\_warning()}, For example:
+
+\begin{python}
+def test_contour_user_warning(self):
+    .....
+    with pytest.warns(UserWarning):
+        .....
+        in_message = { 'binary' : 0.5} #sending invalid input
+
+\end{python}
