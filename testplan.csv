@@ -1,0 +1,32 @@
+title,description,markers
+exceptions_test.py::TestContours::test_contours_output,,
+exceptions_test.py::TestContours::test_contour_no_recieve,,
+exceptions_test.py::TestContours::test_otsu_no_recieve,,
+exceptions_test.py::TestContours::test_contour_user_warning,,
+exceptions_test.py::TestContours::test_otsu_user_warning,,
+exceptions_test.py::TestContours::test_valid_contour,,
+exceptions_test.py::TestContours::test_fail_contour,,
+fixtures_test.py::TestReqMultiFixtures::test_input_terminate,"Test the termination of input node
+        TEST TYPE : connect",type
+fixtures_test.py::TestReqMultiFixtures::test_collector_terminate,"Test the termination of collector node
+        TEST TYPE : connect",type
+fixtures_test.py::TestReqMultiFixtures::test_otsu_terminate,"Test the termination of otsu node
+        TEST TYPE : bind",type
+fixtures_test.py::TestReqMultiFixtures::test_contours_terminate,"Test the termination of contours node
+        TEST TYPE : bind",type
+fixtures_test.py::TestReqMultiFixtures::test_output_terminate,"Test the termination of output node
+        TEST TYPE : connect",type
+mock_test.py::TestMockOSTU::test_otsu_threshold_pass,,
+mock_test.py::TestMockOSTU::test_otsu_threshold_fail,,
+mock_test.py::TestMockOSTU::test_otsu_random[t3],,parametrize
+mock_test.py::TestMockOSTU::test_otsu_random[t4],,parametrize
+skip_xfail_test.py::TestSkipOTSU::test_connection,"Test the connection of OTSU node with in/out sockets
+        TEST TYPE : skip marker","skip,skipif"
+skip_xfail_test.py::TestSkipOTSU::test_output,"Test the output validity of OTSU node with in/out sockets
+        TEST TYPE : skipif marker","skipif,skipif"
+skip_xfail_test.py::TestSkipOTSU::test_terminate,"Test the termination of OTSU node upon empty messages
+        TEST TYPE : xfail non-strict marker","xfail,skipif"
+skip_xfail_test.py::TestSkipOTSU::test_wrong_input,"Test the failure behaviour of OTSU node with invalid inputs
+        TEST TYPE : conditional xfail marker / warnings","xfail,skipif"
+skip_xfail_test.py::TestSkipOTSU::test_wrong_port,"Test the failure behaviour of OTSU node upon connection with wrong ports
+        TEST TYPE : skippable xfail marker","xfail,skipif"
